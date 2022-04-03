@@ -1,6 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const dbUri = "mongodb://admin:fopz.bopz.9999.HMM@127.0.0.1:27017/?compressors=zlib&gssapiServiceName=mongodb";
+const dbUri = "mongodb://admin:password@127.0.0.1:27017/?compressors=zlib&gssapiServiceName=mongodb";
 const client = MongoClient(dbUri, {
     useNewUrlParser: true,
     useUnifiedTopology: true

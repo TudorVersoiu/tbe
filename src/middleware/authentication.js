@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { SecretKey } = require('../../config');
+const { JWTSecretKey } = require('../../config');
 
 const authenticateJWT = (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -8,7 +8,7 @@ const authenticateJWT = (req, res, next) => {
     if ( authHeader ) {
         const token = authHeader.split(' ')[1];
 
-        jwt.verify(token, Buffer.from(SecretKey, 'base64'), (err, user) => {
+        jwt.verify(token, Buffer.from(JWTSecretKey, 'base64'), (err, user) => {
             if ( err ) {
                 console.log(err);
                 return res.sendStatus(403);

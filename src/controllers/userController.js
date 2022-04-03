@@ -3,7 +3,10 @@ const jwtconfig = require('../../config');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
-// Login endpoint 
+// POST /api/users/login
+// body => email + username + password
+// onSuccess: {accessToken: token}
+// onError: [message]
 module.exports.login = async (req, res) => {
   let email = req.body.email;
   let username = req.body.username;
@@ -19,8 +22,8 @@ module.exports.login = async (req, res) => {
     if (!dbUser) throw "Wrong username or password";
     let result = await bcrypt.compare(pass, dbUser.password);
     if (!result) throw "Wrong password!";
-  } catch (e) {
-    res.send({error: e});
+  } catch ( login_error ) {
+    res.status(400).send([login_error]);
     return;
   }
 
@@ -30,7 +33,7 @@ module.exports.login = async (req, res) => {
       email: dbUser.email,
       role: dbUser.role
     },
-    Buffer.from(jwtconfig.SecretKey, 'base64')
+    Buffer.from(jwtconfig.JWTSecretKey, 'base64')
   );
 
   res.json({accessToken: token});
@@ -50,7 +53,7 @@ module.exports.register = async (req, res) => {
 
   if ( existingUserEmail ) {
     res.status(409).send(
-      {error: "Username or email already in use!"}
+      ["Username or email already in use!"]
     );
     return;
   }
@@ -60,6 +63,16 @@ module.exports.register = async (req, res) => {
   let newUser = new User(req.body);
   newUser.password = password_hash;
 
-  newUser.save();
-  res.send({result: "Entity saved"});
+
+  try {
+    await newUser.save();
+    res.send({result: "Entity saved"});
+  } catch (error) {
+    // Validation failed, return error messages
+    let error_list = [];
+    Object.keys(error.errors).forEach((key) => {
+      error_list.push(error.errors[key].message);
+    });
+    res.status(400).send(error_list);
+  }
 }

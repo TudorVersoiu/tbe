@@ -4,6 +4,9 @@ const Game = require('../models/game');
 const Engine = require('node-uci').Engine;
 const chess = require('chess'); 
 
+// POST /api/games/download
+// Download user games from lichess
+// TODO: req.body.username should be used for username
 module.exports.lichessDownload = async (req, res) => {
   let games = await gameService.fetchFromLichessUser('TooDoor');
 
@@ -16,6 +19,9 @@ module.exports.lichessDownload = async (req, res) => {
   res.send({success: "true"});
 }
 
+// GET /api/games/getUserGames
+// Query parameters: username -> string
+// Return list of games for user specified in query
 module.exports.getUserGames = async (req, res) => {
   console.log("called");
   let username = req.query.username;
@@ -28,6 +34,10 @@ module.exports.getUserGames = async (req, res) => {
   res.send(games);
 }
 
+// POST /api/games/analyze
+// Body parameters: gameId
+// Endpoint for processing of a game
+// This might take minutes to complete(there is probably a better approach)
 module.exports.analyseGame = async (req, res) => {
   console.log(`Analyzing game ${req.body.gameId}`);
   let dbGame = await Game.findOne({_id: req.body.gameId});
@@ -73,10 +83,12 @@ module.exports.analyseGame = async (req, res) => {
   res.send({success: true});
 }
 
+
 module.exports.getAll = (req, res) => {
   
 }
 
+// /api/games/add
 module.exports.addOne = (req, res) => {
   
 }
