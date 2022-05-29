@@ -17,7 +17,6 @@ module.exports.fetchFromLichessUser = async (username) => {
         }
     });
 
-
     // Parse from ndjson to json
     let games = response.data.split('\n');
     games = games.filter((string) => {if (string != '') return string;}).map(JSON.parse);

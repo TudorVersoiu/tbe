@@ -3,18 +3,24 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 
+const config = require('./config')
+
 const app = express();
 
+// Temporary imports for db initialization
+const Game = require('./src/models/game');
+const User = require('./src/models/user');
 
+
+// Connect to MongoDB database
 async function connectToDB() {
-  // local DB, so no auth
-  await mongoose.connect(
-    "mongodb://127.0.0.1:27017/chess", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+  console.log("Connecting to MongoDB...");
+  await mongoose.connect.apply(this, config.MongoDBConnectionString);
+  await mongoose.connection.useDb("chess");
+  console.log("MongoDB succesful connection");
 }
 
+// Http server config
 async function startHttpServer() {
   app.use(express.json());
   app.use(cors());
@@ -27,10 +33,29 @@ async function startHttpServer() {
   });
 }
 
+// TODO: real time connection for the chess table???
 async function startWebSocketServer() {
-  // TODO: implement
 }
 
-connectToDB();
-startHttpServer();
-startWebSocketServer();
+// Initialize application and start listening
+// Do not start http server until previous services have started
+async function startUp() {
+  await Promise.all([connectToDB()]);
+
+  // Dummy insert to initialize db
+  console.log("Insert new game into games");
+  const newGame = Game({
+    createdAt: 1650664337511,
+    lastMoveAt: 1650664337511,
+    moves: ["dxe5"],
+    ownerUserName: "noname",
+    ownerColor: "black",
+    winner: "true"
+});
+  await newGame.save();
+
+  startHttpServer();
+  startWebSocketServer();
+}
+
+startUp();
